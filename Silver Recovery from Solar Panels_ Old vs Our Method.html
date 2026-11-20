@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Silver Recovery from Solar Panels: Old Method vs Our Idea</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#EAF1F5;--fg:#0B2A3C;--mut:#4B6577;--card:rgba(255,255,255,.94);--line:rgba(11,42,60,.18);--teal:#0E6F7B;--amber:#B8730A;--amberbg:#F5A623}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B2A3C;--fg:#E8F0F4;--mut:#9DB4C2;--card:rgba(16,50,70,.93);--line:rgba(255,255,255,.2);--teal:#5CC8D4;--amber:#F5A623}}
+:root[data-theme="dark"]{--bg:#0B2A3C;--fg:#E8F0F4;--mut:#9DB4C2;--card:rgba(16,50,70,.93);--line:rgba(255,255,255,.2);--teal:#5CC8D4;--amber:#F5A623}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#labels{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;white-space:nowrap;color:var(--fg)}
+.lbl b{display:inline-block;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;background:var(--teal);color:#fff;margin-right:4px;font-size:11px}
+.lbl.ch b{background:var(--amberbg);color:#0B2A3C}
+.lbl.on{border-color:var(--amberbg);box-shadow:0 0 0 2px var(--amberbg)}
+.lbl.bin{pointer-events:none;font-size:11px;color:var(--mut);border-style:dashed;transform:translate(-50%,-50%)}
+header{position:fixed;left:16px;right:140px;top:calc(12px + env(safe-area-inset-top,0px));pointer-events:none}
+h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:20px}
+header p{margin:2px 0 0;font-size:12px;color:var(--mut)}
+#tools{position:fixed;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:6px}
+#tools button{min-width:36px;padding:0 10px;background:var(--card)}
+.panel{position:fixed;left:12px;right:12px;bottom:calc(150px + env(safe-area-inset-bottom,0px));max-width:440px;max-height:40vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;backdrop-filter:blur(6px)}
+.panel h2{margin:6px 0 4px;font-family:Georgia,"Times New Roman",serif;font-size:18px}
+.panel p{margin:0;font-size:14px;line-height:1.45}
+small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:2px}
+.row{display:flex;justify-content:space-between;align-items:center}
+#step{font-size:11px;color:var(--mut)}
+#tag{font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:6px;padding:2px 8px;border:1px solid currentColor}
+#tag.p{color:var(--teal)}#tag.c{color:var(--amber)}#tag.o{color:var(--mut)}
+.io{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:10px;font-size:12.5px;line-height:1.35}
+.io>div{border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.io .ar{border:0;padding:0;font-size:18px;color:var(--amber)}
+#meter{margin-top:10px}
+.mt{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.mt i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--amberbg));transition:width .7s ease}
+#say{margin-top:10px;border-left:3px solid var(--amberbg);padding-left:10px}
+#say p{font-size:13px;font-style:italic}
+body.nonotes #say{display:none}
+#cmp{display:none;max-width:480px}
+body.cmp #card{display:none}body.cmp #cmp{display:block}
+.bars{margin-top:10px;display:grid;gap:10px}
+.bars .n{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px}
+.bar{height:22px;border-radius:7px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:7px;color:#fff;font-size:11px;font-weight:700;line-height:22px;padding-left:8px;box-sizing:border-box;white-space:nowrap;transition:width .45s ease}
+#bc{background:#6b7f8e;width:100%}#bo{background:var(--teal);color:#fff}
+#cmp input{width:100%;accent-color:#F5A623}
+#cmp ul{margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.45}
+.note{font-size:11.5px;color:var(--mut);margin-top:8px}
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));width:calc(100% - 24px);max-width:720px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:8px;align-items:center;overflow:hidden}
+#prog{position:absolute;left:0;top:0;height:3px;width:0;background:var(--amberbg)}
+#dots,#btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;font-size:13px;min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--amberbg)}
+#dots button{width:36px;padding:0;border-radius:50%;border-color:var(--teal)}
+#dots button.ch{border-color:var(--amberbg)}
+#dots button.on,#auto.on,#cmpb.on,#notes.on{background:var(--amberbg);color:#0B2A3C;border-color:var(--amberbg)}
+h1{background:linear-gradient(90deg,var(--fg),var(--teal) 60%,var(--amberbg));-webkit-background-clip:text;background-clip:text;color:transparent}
+.panel{box-shadow:0 0 0 1px rgba(92,200,212,.1),0 12px 40px rgba(0,0,0,.35)}
+#big{position:absolute;right:14px;top:4px;font:700 56px Georgia,serif;opacity:.1;pointer-events:none}
+#xrow{display:none;margin-top:10px}body.s0 #xrow{display:block}#xrow input{width:100%;accent-color:#F5A623}
+.lbl.lay{pointer-events:none;font-size:11px;border-style:dashed;transform:translate(0,-50%)}
+@media (min-width:760px){.panel{left:16px;right:auto;bottom:auto;top:calc(76px + env(safe-area-inset-top,0px));width:360px;max-height:calc(100vh - 230px)}#cmp{width:420px}#bar{flex-direction:row;justify-content:space-between}}
+@media (max-width:759px){.lbl span{display:none}.lbl.on span{display:inline}.lbl.bin,.lbl.lay{display:none!important}h1{font-size:17px}}
+
+#cmp{max-width:540px}
+#tag2{font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:6px;padding:2px 8px;border:1px solid var(--amber);color:var(--amber)}
+.tabs{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}.tabs button{min-height:32px;font-size:12.5px}.tabs button.on{background:var(--amberbg);color:#0B2A3C;border-color:var(--amberbg)}
+.tp{display:none}.tp.on{display:block}
+.lead{font-size:13px!important;color:var(--mut);margin-bottom:8px!important}
+.flow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:11px;margin:6px 0;padding:6px;border:1px solid var(--line);border-radius:10px}
+.flow b{font-size:10px;letter-spacing:.08em;padding:2px 6px;border-radius:5px;background:#6b7f8e;color:#fff}.flow.new b{background:var(--teal);color:#0B2A3C}
+.flow span{padding:2px 7px;border-radius:99px;border:1px solid var(--line)}.flow i{color:var(--mut);font-style:normal}
+.flow .hot{border-color:var(--amberbg);color:var(--amber)}.flow .key{background:var(--teal);color:#0B2A3C;border-color:var(--teal);font-weight:700}
+.ct{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}.ct th,.ct td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.ct th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.ct td:first-child{color:var(--mut)}.ct td:last-child{color:var(--teal);font-weight:600}
+.v{font-weight:700}
+#br,#bt,#bs{background:var(--teal)}
+blockquote{margin:6px 0 10px;padding-left:10px;border-left:3px solid var(--amberbg);font-family:Georgia,serif;font-style:italic;font-size:14px;line-height:1.4}
+.cards{display:grid;gap:8px}.cards>div{border:1px solid var(--line);border-radius:10px;padding:7px 9px}.cards p{font-size:12.5px!important}.cards em{color:var(--amber);font-style:normal;font-weight:700}
+.val{margin-top:10px;border:1px dashed var(--amberbg);border-radius:10px;padding:7px 9px}.val ul{margin:4px 0 0;padding-left:18px;font-size:12.5px;line-height:1.45}
+@media (min-width:760px){#cmp{width:520px}}
+.lbl.old b{background:#d2604a;color:#fff}
+.lbl.ttl{pointer-events:none;font-weight:700;letter-spacing:.04em;font-size:13px;transform:translate(-50%,-50%)}
+.lbl.ttl.o{border-color:#d2604a;color:#d2604a}.lbl.ttl.n{border-color:var(--teal);color:var(--teal)}
+.lbl.call{pointer-events:none;font-size:11.5px;transform:translate(-50%,-50%)}
+.lbl.call.o{border-color:#d2604a}.lbl.call.n{border-color:var(--teal)}
+@media (max-width:759px){.lbl.call{display:none!important}.lbl.ttl{font-size:11px}}
+.cbtn{min-height:28px;font-size:12px;padding:0 10px}
+.hd{cursor:pointer}
+#cmp.min>*:not(.hd):not(h2),#card.min>*:not(.row):not(h2){display:none!important}
+#cmp.min,#card.min{padding-bottom:10px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<header><h1>Silver recovery from end-of-life solar panels</h1><p>Interactive 3D process · drag to rotate · scroll to zoom · ← → keys to step</p></header>
+<div id="tools"><button id="theme" title="Light / dark">◐</button><button id="fs" title="Fullscreen">⛶</button></div>
+
+<div class="panel" id="card">
+ <span id="big"></span>
+ <div class="row"><span id="tag"></span><span id="step"></span><button class="cbtn" id="cc2" aria-expanded="true" title="Collapse / expand">▾</button></div>
+ <h2 id="ct"></h2><p id="cd"></p>
+ <div id="xrow"><small>Explode view · pull the layers apart</small><input id="xp" type="range" min="0" max="100" value="60" aria-label="Explode view"><p class="note">Silver (the amber lines) sits only in the thin grid on the cell layer.</p></div>
+ <div class="io"><div><small>In</small><span id="inn"></span></div><div class="ar">→</div><div><small>Out</small><span id="out"></span></div></div>
+ <div id="meter"><small>Silver concentration · schematic</small><div class="mt"><i id="mf"></i></div></div>
+ <div id="say"><small>Say it like this</small><p id="sp"></p></div>
+</div>
+
+<div class="panel" id="cmp">
+ <div class="row hd" id="cmphd"><span id="tag2">OLD vs OURS</span><button class="cbtn" id="cc" aria-expanded="true" title="Collapse / expand">▾ Collapse</button></div>
+ <h2>Why our route is different</h2>
+ <div class="tabs" role="tablist"><button class="on" data-t="t1">Old vs ours</button><button data-t="t2">Load model</button><button data-t="t3">Our idea</button></div>
+
+ <section class="tp on" id="t1">
+  <p class="lead">Behind this panel: back row = old route, front row = our route. Same goal, opposite order. Drag to rotate, scroll to zoom.</p>
+  <table class="ct"><thead><tr><th></th><th>Conventional</th><th>Ours</th></tr></thead><tbody>
+   <tr><td>What chemistry sees</td><td>Mixed, bulk material</td><td>Silver-rich cell fraction</td></tr>
+   <tr><td>Amount to leach</td><td>Large</td><td>Concentrated, smaller</td></tr>
+   <tr><td>Dissolution</td><td>Many metals dissolve</td><td>Aim: selective Ag</td></tr>
+   <tr><td>Separation after</td><td>More complex</td><td>Simplified</td></tr>
+   <tr><td>Chemical burden</td><td>Higher</td><td>Potentially lower</td></tr>
+   <tr><td>Waste streams</td><td>Mixed, more complex</td><td>Better separated</td></tr>
+   <tr><td>Glass / Al</td><td>Enter the mix</td><td>Leave early, own recycling</td></tr>
+  </tbody></table>
+ </section>
+
+ <section class="tp" id="t2">
+  <p class="lead">The chemical stage scales with how much material it must treat. Concentrate first and that number shrinks.</p>
+  <div class="bars">
+   <div><div class="n"><span>Chemical-only route</span><span class="v">100%</span></div><div class="bar"><i id="bc">100%</i></div></div>
+   <div><div class="n"><span>Our route: material to leach</span><span class="v" id="v1"></span></div><div class="bar"><i id="bo">20%</i></div></div>
+   <div><div class="n"><span>Reagent demand (relative)</span><span class="v" id="v2"></span></div><div class="bar"><i id="br"></i></div></div>
+   <div><div class="n"><span>Leach tank size (relative)</span><span class="v" id="v3"></span></div><div class="bar"><i id="bt"></i></div></div>
+   <div><div class="n"><span>Residue to handle (relative)</span><span class="v" id="v4"></span></div><div class="bar"><i id="bs"></i></div></div>
+  </div>
+  <div style="margin-top:12px"><div class="n" style="display:flex;justify-content:space-between;font-size:12.5px"><span>Concentration factor</span><b id="kv">5×</b></div><input id="k" type="range" min="2" max="20" step="1" value="5" aria-label="Concentration factor"></div>
+  <p class="note">Illustrative model only: load ∝ 1 ÷ concentration factor, silver recovery held equal. Not a measured saving. Replace with our lab value after validation.</p>
+ </section>
+
+ <section class="tp" id="t3">
+  <blockquote>Instead of bringing the whole solar panel to the chemistry, we bring the silver-rich fraction to the chemistry.</blockquote>
+  <div class="cards">
+   <div><small>1 · Order flips</small><p>Physical concentration comes <em>before</em> chemistry, not after. Most routes leach first and sort out the mess later.</p></div>
+   <div><small>2 · Early exits</small><p>Al frame, glass and the low-silver fraction leave the silver path early, each to its own recycling route.</p></div>
+   <div><small>3 · Targeted chemistry</small><p>Leaching is aimed at silver in an already enriched feed, not at dissolving every metal.</p></div>
+   <div><small>4 · Cleaner downstream</small><p>Fewer co-dissolved metals means simpler separation and better-separated waste streams.</p></div>
+   <div><small>5 · Circular supply</small><p>Recovered Ag goes back into new products, including new solar panels.</p></div>
+  </div>
+  <div class="val"><small>Status: claims to validate experimentally</small>
+   <ul><li>Concentration factor and silver loss to the low-silver fraction</li><li>Silver recovery % in selective leaching</li><li>Reagent use compared with a leach-everything baseline</li><li>Purity of recovered silver</li></ul></div>
+ </section>
+</div>
+
+<nav id="bar"><div id="prog"></div><div id="dots"></div><div id="btns"><button id="prev">‹ Prev</button><button id="next">Start tour ›</button><button id="ov">Overview</button><button id="cmpb">Old vs Ours</button><button id="auto">▶ Auto</button><button id="notes" class="on">Talk track</button></div></nav>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const cv=$('#c'),ren=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+ren.setPixelRatio(Math.min(devicePixelRatio||1,2));
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,1,.1,400);
+scene.add(new THREE.AmbientLight(0xffffff,.65));
+const dl=new THREE.DirectionalLight(0xffffff,.85);dl.position.set(8,14,10);scene.add(dl);
+const rim=new THREE.PointLight(0xf5a623,.6,60);rim.position.set(0,7,-8);scene.add(rim);
+const lam=(c,o={})=>new THREE.MeshLambertMaterial(Object.assign({color:c},o));
+const pho=(c,o={})=>new THREE.MeshPhongMaterial(Object.assign({color:c},o));
+const add=(g,geo,mat,x=0,y=0,z=0)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);g.add(m);return m};
+const BOX=(w,h,d)=>new THREE.BoxGeometry(w,h,d),CYL=(a,b,h,s=32,o=false)=>new THREE.CylinderGeometry(a,b,h,s,1,o),SPH=r=>new THREE.SphereGeometry(r,12,10);
+const AG=pho(0xe6ecf1,{specular:0xffffff,shininess:100,emissive:0x2a3036}),AGG=pho(0xfff1c9,{emissive:0xf5a623,emissiveIntensity:.8}),
+AL=pho(0xb5bfc8,{specular:0xffffff,shininess:60}),GLASS=lam(0x9fd8ee,{transparent:true,opacity:.3}),GRAYP=lam(0x7f93a3),
+GL=(c,o=.25)=>lam(c,{transparent:true,opacity:o,side:THREE.DoubleSide});
+const GLW=[],gt=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),r=x.createRadialGradient(64,64,0,64,64,64);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.35,'rgba(255,255,255,.35)');r.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=r;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)})();
+const glow=(g,x,y,z,s,col)=>{const m=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:col,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false}));m.scale.set(s,s,1);m.position.set(x,y,z);g.add(m);GLW.push({m,ph:Math.random()*6});return m};
+const N=8,X=i=>i*5-17.5,PH=i=>i<5?0x14808c:0xf5a623,G=[],A=[],R=[];
+const floorM=lam(0xcfdce4),floor=add(scene,new THREE.PlaneGeometry(90,18),floorM,0,-.02,0);floor.rotation.x=-Math.PI/2;
+const grid=new THREE.GridHelper(90,90,0x2a5b73,0x2a5b73);grid.material.transparent=true;grid.material.opacity=.25;scene.add(grid);
+for(let i=0;i<N;i++){const g=new THREE.Group();g.position.x=X(i);scene.add(g);G.push(g);
+ add(g,CYL(2.1,2.2,.16,48),lam(0x12384d));
+ const r=add(g,new THREE.RingGeometry(1.95,2.05,64),new THREE.MeshBasicMaterial({color:PH(i),side:THREE.DoubleSide,transparent:true}),0,.085,0);r.rotation.x=-Math.PI/2;R.push(r)}
+function cellTex(cols,rows,lc='#dfe6ec'){const c=document.createElement('canvas');c.width=cols*64;c.height=rows*64;const x=c.getContext('2d');x.fillStyle='#0e1d40';x.fillRect(0,0,c.width,c.height);
+ for(let r=0;r<rows;r++)for(let q=0;q<cols;q++){const ox=q*64,oy=r*64;x.fillStyle='#244a9a';x.fillRect(ox+3,oy+3,58,58);x.strokeStyle=lc;x.lineWidth=1;
+  for(let k=1;k<10;k++){x.beginPath();x.moveTo(ox+3+k*5.8,oy+3);x.lineTo(ox+3+k*5.8,oy+61);x.stroke()}
+  x.lineWidth=3;[22,42].forEach(y=>{x.beginPath();x.moveTo(ox+3,oy+y);x.lineTo(ox+61,oy+y);x.stroke()})}
+ return new THREE.CanvasTexture(c)}
+function panel(parent){const p=new THREE.Group();parent.add(p);const side=lam(0x0e1d40);
+ const layer=new THREE.Mesh(BOX(2.4,.05,1.6),[side,side,lam(0xffffff,{map:cellTex(6,4)}),side,side,side]);p.add(layer);
+ const glass=add(p,BOX(2.44,.04,1.64),GLASS,0,.06,0);
+ const F=[[0,.86,2.64,.1,0,1],[0,-.86,2.64,.1,0,-1],[1.27,0,.1,1.82,1,0],[-1.27,0,.1,1.82,-1,0]].map(([x,z,w,d,dx,dz])=>{const m=add(p,BOX(w,.1,d),AL,x,.02,z);m.userData={x,z,dx,dz};return m});
+ return{p,layer,glass,F}}
+// 0 panel: exploded layer view, silver grid glows amber
+let XV=.6,xAuto=true,EXV=.5;const LAY=[],LAYL=[];
+{const p=new THREE.Group();G[0].add(p);const sd=lam(0x0e1d40),eva=()=>lam(0xf2e3a0,{transparent:true,opacity:.35});
+ const defs=[['Glass',BOX(2.44,.06,1.64),GLASS],['EVA encapsulant',BOX(2.4,.03,1.6),eva()],['Si cell + Ag grid',BOX(2.4,.05,1.6),[sd,sd,lam(0xffffff,{map:cellTex(6,4,'#ffc766')}),sd,sd,sd]],['EVA encapsulant',BOX(2.4,.03,1.6),eva()],['Backsheet',BOX(2.44,.04,1.64),lam(0xdfe6ea)]];
+ defs.forEach(d=>LAY.push({m:add(p,d[1],d[2]),y:.7}));
+ const F=[[0,.86,2.64,.1,0,1],[0,-.86,2.64,.1,0,-1],[1.27,0,.1,1.82,1,0],[-1.27,0,.1,1.82,-1,0]].map(([x,z,w,d,dx,dz])=>{const m=add(p,BOX(w,.1,d),AL,x,.7,z);m.userData={x,z,dx,dz};return m});
+ defs.map(d=>d[0]).concat(['Al frame']).forEach(n=>{const l=document.createElement('div');l.className='lbl lay';l.textContent=n;$('#labels').appendChild(l);LAYL.push(l)});
+ glow(p,0,.7,0,3.6,0xf5a623);
+ A[0]=t=>{const ex=xAuto?.5+.5*Math.sin(t*.7):XV;EXV=ex;p.rotation.y=.5+Math.sin(t*.3)*.3;
+  LAY.forEach((o,i)=>{o.y=.7+(2-i)*ex*.42;o.m.position.y=o.y});
+  F.forEach(m=>{m.position.x=m.userData.x+m.userData.dx*ex*.6;m.position.z=m.userData.z+m.userData.dz*ex*.6})}}
+// 1 remove frame
+{const a=panel(G[1]);A[1]=t=>{const o=.3+.25*(.5+.5*Math.sin(t*1.3));a.F.forEach(m=>{m.position.x=m.userData.x+m.userData.dx*o;m.position.z=m.userData.z+m.userData.dz*o});a.p.position.y=.7;a.p.rotation.y=.25+Math.sin(t*.4)*.2}}
+// 2 separate glass
+{const a=panel(G[2]);a.F.forEach(m=>m.visible=false);A[2]=t=>{a.glass.position.y=.55+.12*Math.sin(t*1.2);a.p.position.y=.6;a.p.rotation.y=.25+Math.sin(t*.4)*.2}}
+// 3 recover cells
+{const g=new THREE.Group();G[3].add(g);const cs=[];const tx=cellTex(1,1),sd=lam(0x0e1d40),mt=[sd,sd,lam(0xffffff,{map:tx}),sd,sd,sd];
+ for(let r=0;r<4;r++)for(let q=0;q<6;q++){const m=new THREE.Mesh(BOX(.38,.04,.38),mt);m.position.set((q-2.5)*.44,0,(r-1.5)*.44);g.add(m);cs.push({m,q,r})}
+ A[3]=t=>{g.rotation.y=Math.sin(t*.4)*.35;cs.forEach(o=>o.m.position.y=.75+Math.sin(t*1.5+o.q*.6+o.r*.9)*.07)}}
+// 4 physical concentration
+{const g=G[4];add(g,CYL(1.15,.16,1.3,36,true),GL(0x2aa6b3,.35),0,2.05,0);
+ add(g,BOX(1.2,.3,1.2),lam(0x5d7384,{transparent:true,opacity:.85}),-1,.23,0);add(g,BOX(1.2,.3,1.2),lam(0x9a6a10,{transparent:true,opacity:.9}),1,.23,0);glow(g,1,.5,0,2.6,0xf5a623);
+ const ps=[];for(let k=0;k<44;k++){const s=k%4==0;ps.push({m:add(g,SPH(s?.075:.065),s?AGG:GRAYP),s,p:Math.random(),rx:Math.random()*2-1,rz:Math.random()*2-1})}
+ A[4]=t=>ps.forEach(o=>{const u=(t*.22+o.p)%1,e=.55,y=2.75-2.35*u;let x,z;
+  if(u<e){const r=.95-.8*(u/e);x=o.rx*r*.7;z=o.rz*r*.7}else{const k=(u-e)/(1-e),sm=k*k*(3-2*k);x=o.rx*.12*(1-sm)+(o.s?1:-1)*sm+o.rx*.3*sm;z=o.rz*.12*(1-sm)+o.rz*.3*sm}
+  o.m.position.set(x,y,z)})}
+function beaker(g,col){add(g,CYL(.95,.85,1.8,40,true),GL(0xcfeaf3,.2),0,.98,0);add(g,CYL(.9,.82,1.15,40),lam(col,{transparent:true,opacity:.55}),0,.72,0)}
+// 5 selective leaching
+{const g=G[5];beaker(g,0x2aa6b3);const gr=[],bb=[];
+ for(let k=0;k<20;k++)gr.push({m:add(g,SPH(.07),AG),a:Math.random()*6.28,w:.4+Math.random()*.6,r:.15+Math.random()*.5,h:Math.random(),p:Math.random()});
+ for(let k=0;k<16;k++)bb.push({m:add(g,SPH(.035),lam(0xffffff,{transparent:true,opacity:.7})),x:(Math.random()-.5)*1.1,z:(Math.random()-.5)*1.1,p:Math.random()});
+ A[5]=t=>{gr.forEach(o=>{const a=t*o.w+o.a,k=(t*.12+o.p)%1;o.m.position.set(Math.cos(a)*o.r,.35+o.h*.7,Math.sin(a)*o.r);o.m.scale.setScalar(Math.max(.05,1-k))});
+  bb.forEach(b=>{const u=(t*.3+b.p)%1;b.m.position.set(b.x,.25+u*1.05,b.z)})}}
+// 6 precipitation / electrodeposition
+{const g=G[6];beaker(g,0xe9c46a);add(g,BOX(.08,1.5,.5),AL,-.45,1,0);add(g,BOX(.08,1.5,.5),lam(0x34495a),.45,1,0);
+ const dep=add(g,BOX(.12,1,.54),AG,.53,.5,0),io=[];glow(g,.55,.8,0,2.2,0xffc766);
+ for(let k=0;k<16;k++)io.push({m:add(g,SPH(.045),AGG),y:.4+Math.random()*.8,z:(Math.random()-.5)*.3,p:Math.random()});
+ A[6]=t=>{const s=.15+.85*((t*.12)%1);dep.scale.y=s;dep.position.y=.3+.5*s;
+  io.forEach(o=>{const u=(t*.35+o.p)%1;o.m.position.set(-.35+.8*u,o.y,o.z);o.m.scale.setScalar(u>.9?(1-u)*10:1)})}}
+// 7 recovered silver
+{const g=G[7],gr=new THREE.Group();g.add(gr);const ig=CYL(.42,.52,.27,4);ig.rotateY(Math.PI/4);
+ const ing=(x,y)=>{const m=add(gr,ig,AG,x,y,0);m.scale.x=1.5};[-1.15,0,1.15].forEach(x=>ing(x,.22));[-.58,.58].forEach(x=>ing(x,.5));ing(0,.78);
+ const sp=[];for(let k=0;k<16;k++)sp.push({m:add(g,SPH(.04),AGG),a:Math.random()*6.28,r:.6+Math.random()*1.3,p:Math.random()});
+ glow(g,0,.8,0,4,0xffc766);const pl=new THREE.PointLight(0xffc766,.9,8);pl.position.set(0,2,1.5);g.add(pl);
+ A[7]=t=>{gr.rotation.y=Math.sin(t*.4)*.5;sp.forEach(o=>{const u=(t*.2+o.p)%1;o.m.position.set(Math.cos(o.a+t*.5)*o.r,.4+u*1.8,Math.sin(o.a+t*.5)*o.r);o.m.scale.setScalar(Math.sin(u*Math.PI)+.01)})}}
+// side streams: material that leaves the silver path, into its own bin
+const SIDE={1:[0xb5bfc8,'Al frame → Al recycling'],2:[0x9fd8ee,'Glass → glass recycling'],4:[0x7f93a3,'Low-silver fraction → diverted'],5:[0x8a7a5a,'Solid residue → handled separately']};
+const sp2=[],binL={};
+Object.keys(SIDE).forEach(k=>{const i=+k,[col,txt]=SIDE[k];
+ add(scene,BOX(1.9,.3,1.2),lam(col),X(i),.15,-3.4);
+ const ps=[];for(let j=0;j<7;j++)ps.push({m:add(scene,SPH(.07),lam(col)),p:j/7});
+ sp2.push({i,col,ps});
+ const l=document.createElement('div');l.className='lbl bin';l.textContent=txt;$('#labels').appendChild(l);binL[i]=l});
+// flow track
+// ===== OLD ROUTE row (shown in Old vs Ours mode) =====
+const OLD=new THREE.Group();OLD.visible=false;OLD.position.z=-14;scene.add(OLD);
+const AO=[],OL=[],CL=[],OX=i=>i*7-17.5,OLDN=['Old panel','Crush / shred all','Leach everything','Many metals dissolve','Complex separation','Silver (late, mixed)'];
+const MX=[lam(0x9fd8ee),lam(0xb5bfc8),lam(0xdfe6ea),lam(0x244a9a),lam(0x7f93a3)],RED=0xd2604a;
+const ofl=new THREE.Mesh(new THREE.PlaneGeometry(90,18),floorM);ofl.rotation.x=-Math.PI/2;ofl.position.y=-.02;OLD.add(ofl);
+const OG=[];
+for(let i=0;i<6;i++){const g=new THREE.Group();g.position.x=OX(i);OLD.add(g);OG.push(g);add(g,CYL(2.1,2.2,.16,48),lam(0x3b4452));
+ const r=add(g,new THREE.RingGeometry(1.95,2.05,64),new THREE.MeshBasicMaterial({color:i>1&&i<5?RED:0x8a97a3,side:THREE.DoubleSide}),0,.085,0);r.rotation.x=-Math.PI/2;
+ const l=document.createElement('div');l.className='lbl old';l.innerHTML='<b>'+(i+1)+'</b><span>'+OLDN[i]+'</span>';$('#labels').appendChild(l);OL.push(l)}
+const mkL=(cls,txt)=>{const l=document.createElement('div');l.className='lbl '+cls;l.textContent=txt;$('#labels').appendChild(l);return l};
+// 1 whole panel
+{const a=panel(OG[0]);a.p.position.y=.7;AO.push(t=>{a.p.rotation.y=.25+Math.sin(t*.4)*.2})}
+// 2 crush everything
+{const g=OG[1];add(g,CYL(1.3,.45,1.2,24,true),GL(0x8a97a3,.4),0,1.9,0);add(g,BOX(1.6,.3,1.6),lam(0x4a5360),0,.3,0);
+ const ps=[];for(let k=0;k<60;k++)ps.push({m:add(g,SPH(.07),k%12==0?AGG:MX[k%5]),p:Math.random(),rx:Math.random()*2-1,rz:Math.random()*2-1});
+ AO.push(t=>ps.forEach(o=>{const u=(t*.25+o.p)%1;o.m.position.set(o.rx*(.9-.6*u),2.6-2.1*u,o.rz*(.9-.6*u))}))}
+// 3 leach the whole mixture (big tank)
+{const g=OG[2],s=new THREE.Group();s.scale.setScalar(1.25);g.add(s);beaker(s,0xb5651d);
+ const ps=[];for(let k=0;k<56;k++)ps.push({m:add(s,SPH(.07),k%14==0?AGG:MX[k%5]),a:Math.random()*6.28,w:.3+Math.random()*.5,r:.1+Math.random()*.6,h:Math.random()});
+ AO.push(t=>ps.forEach(o=>{const a=t*o.w+o.a;o.m.position.set(Math.cos(a)*o.r,.35+o.h*.8,Math.sin(a)*o.r)}))}
+// 4 many metals dissolve
+{const g=OG[3],s=new THREE.Group();s.scale.setScalar(1.15);g.add(s);beaker(s,0x7a4a8a);
+ const cols=[0xd9822b,0xb5bfc8,0x6b7f8e,0x58a65c,0x9b6bd1],ms=cols.map(c=>lam(c)),ps=[];
+ for(let k=0;k<60;k++)ps.push({m:add(s,SPH(.055),k%15==0?AGG:ms[k%5]),a:Math.random()*6.28,w:.3+Math.random()*.6,r:.1+Math.random()*.65,h:Math.random()});
+ AO.push(t=>ps.forEach(o=>{const a=t*o.w+o.a;o.m.position.set(Math.cos(a)*o.r,.3+o.h*.85,Math.sin(a)*o.r)}))}
+// 5 complex separation (several columns)
+{const g=OG[4],cols=[0xd9822b,0x58a65c,0xffd27a],ps=[];
+ cols.forEach((c,j)=>{const x=(j-1)*1.35;add(g,CYL(.45,.4,1.7,24,true),GL(0xcfeaf3,.2),x,.95,0);add(g,CYL(.42,.38,.9,24),lam(c,{transparent:true,opacity:.6}),x,.6,0);
+  for(let k=0;k<6;k++)ps.push({m:add(g,SPH(.04),lam(0xffffff,{transparent:true,opacity:.7})),x,p:Math.random()})});
+ add(g,BOX(3.4,.08,.08),lam(0x8a97a3),0,1.9,0);
+ AO.push(t=>ps.forEach(o=>{const u=(t*.3+o.p)%1;o.m.position.set(o.x+Math.sin(o.p*30)*.15,.25+u*.9,0)}))}
+// 6 silver at the end
+{const g=OG[5],ig=CYL(.42,.52,.27,4);ig.rotateY(Math.PI/4);const m=add(g,ig,AG,0,.22,0);m.scale.x=1.5;glow(g,0,.5,0,2.6,0xffc766)}
+// bigger mixed waste from the chemical stages
+[2,3,4].forEach(i=>{const g=OG[i];add(g,BOX(2.4,.5,1.5),lam(0x6b4a3a),0,.25,-3.4);const ps=[];
+ for(let j=0;j<10;j++)ps.push({m:add(g,SPH(.08),lam(0x8a5a3a)),p:j/10});
+ AO.push(t=>ps.forEach(o=>{const u=(t*.22+o.p)%1;o.m.position.set(Math.sin(o.p*20)*.4,.95-.7*u*u,-.9-2.5*u)}))});
+CL.push([mkL('bin','More mixed wastewater + residue'),OX(3),.9,-3.4-14]);
+// arcs and packets between old stations
+const oP=[];
+for(let i=0;i<5;i++){const c=new THREE.QuadraticBezierCurve3(new THREE.Vector3(OX(i)+2.3,.5,0),new THREE.Vector3((OX(i)+OX(i+1))/2,2.4,0),new THREE.Vector3(OX(i+1)-2.3,.5,0));
+ add(OLD,new THREE.TubeGeometry(c,28,.035,6),new THREE.MeshBasicMaterial({color:i?RED:0x8a97a3,transparent:true,opacity:.7}));
+ for(let j=0;j<3;j++)oP.push({m:add(OLD,SPH(.1),lam(i?RED:0x8a97a3)),c,p:j/3})}
+AO.push(t=>oP.forEach(o=>{const u=(t*.25+o.p)%1;o.m.position.copy(o.c.getPoint(u));o.m.scale.setScalar(.5+.7*Math.sin(u*Math.PI))}));
+// row titles and callouts
+CL.push([mkL('ttl o','OLD ROUTE: leach everything, separate later'),0,5.6,-14]);
+CL.push([mkL('ttl n','OUR ROUTE: concentrate first, then leach'),0,5.6,0]);
+CL.push([mkL('call o','100% of the material goes into the tank'),OX(2),4.4,-14]);
+const NC=mkL('call n','');CL.push([NC,X(5),4.4,0]);
+const lp=(l,x,y,z,show)=>{v.set(x,y,z).project(cam);const sh=show&&v.z<1;l.style.display=sh?'block':'none';l.style.left=(v.x*.5+.5)*innerWidth+'px';l.style.top=(-v.y*.5+.5)*innerHeight+'px'};
+const B=X(4)+2.5,x0=X(0),x7=X(7);
+add(scene,BOX(B-x0,.03,.1),lam(0x14808c),(x0+B)/2,.05,2.6);add(scene,BOX(x7-B,.03,.1),lam(0xf5a623),(B+x7)/2,.05,2.6);
+const dT=pho(0x5cc8d4,{emissive:0x14808c}),dA=pho(0xffd27a,{emissive:0xf5a623}),fd=[];
+for(let k=0;k<36;k++)fd.push(add(scene,SPH(.09),dT,0,.13,2.6));
+// atmosphere: drifting dust
+const DN=500,dg=new THREE.BufferGeometry(),dp=new Float32Array(DN*3);
+for(let i=0;i<DN;i++){dp[i*3]=(Math.random()-.5)*70;dp[i*3+1]=Math.random()*12;dp[i*3+2]=(Math.random()-.5)*18-3}
+dg.setAttribute('position',new THREE.BufferAttribute(dp,3));
+scene.add(new THREE.Points(dg,new THREE.PointsMaterial({color:0x7fd6e0,size:.09,transparent:true,opacity:.55,depthWrite:false})));
+// glowing arcs between stations with travelling packets (teal = physical, amber = chemical)
+const PK=[];
+for(let i=0;i<N-1;i++){const col=i<4?0x14808c:0xf5a623,c=new THREE.QuadraticBezierCurve3(new THREE.Vector3(X(i)+2.3,.5,0),new THREE.Vector3((X(i)+X(i+1))/2,2.4,0),new THREE.Vector3(X(i+1)-2.3,.5,0));
+ add(scene,new THREE.TubeGeometry(c,28,.035,6),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.7}));
+ for(let j=0;j<3;j++)PK.push({m:add(scene,SPH(.1),i<4?dT:dA),c,p:j/3})}
+// pulse wave under the active station
+const wave=new THREE.Mesh(new THREE.RingGeometry(1.9,2.0,64),new THREE.MeshBasicMaterial({color:0x5cc8d4,transparent:true,side:THREE.DoubleSide,depthWrite:false}));wave.rotation.x=-Math.PI/2;wave.position.y=.1;scene.add(wave);
+// content: [title, phase, what happens, in, out, say it like this, silver-concentration %]
+const S=[
+['End-of-life panel','Physical','A panel reaches end-of-life. It is mostly glass, aluminium, polymer and silicon. Silver sits only in the fine contact grid of each cell.','Whole end-of-life module','Module sent to dismantling','Most of a panel is glass and aluminium. The silver is a thin printed grid on each cell, small in weight but worth recovering. Pull the slider to see the layers: silver is only the amber grid.',8],
+['Remove the Al frame','Physical','The aluminium frame comes off first and goes straight into its own recycling stream.','Whole module','Al frame + frameless laminate','Step one is easy and clean. Take the frame off and it goes to aluminium recycling. Nothing is wasted.',8],
+['Separate the glass','Physical','The glass sheet is lifted off the cell layer. Glass also has its own recycling route.','Frameless laminate','Glass + cell layer','Now we split the glass from the cell layer. Glass is the bulk of the mass and it has its own recycling route.',14],
+['Recover the cells','Physical','The solar-cell fraction is recovered. This is the part that carries the silver-bearing metallization.','Cell layer','Solar-cell fraction','From here we only care about the cells, because that is where the silver lives.',22],
+['Physical concentration','Physical','Silver-bearing cell material is concentrated mechanically, so less material reaches the chemical stage. Designed to reduce chemical consumption.','Solar-cell fraction','Silver-rich fraction + low-silver fraction','This is our key idea. Do the cheap mechanical work first, so chemistry only sees the material that is worth treating.',48],
+['Selective leaching','Chemical','Only the concentrated fraction is leached. The aim is to move mainly silver into solution rather than dissolving every metal.','Silver-rich fraction + leaching agent','Ag-containing solution + solid residue','Because the feed is already concentrated, we use less chemistry, and we aim it at silver instead of dissolving everything.',66],
+['Precipitation / electrodeposition','Chemical','Dissolved silver is turned back into solid metal by precipitation, cementation or electrodeposition.','Ag-containing solution','Solid silver metal','Now we turn dissolved silver back into solid metal, by precipitation, cementation or electrodeposition.',88],
+['Recovered silver','Chemical','Recovered Ag returns to the supply chain: new products and new solar technology. A circular loop.','Solid silver','Back into the supply chain','The silver goes back into new products, including new solar panels. That closes the loop.',100]];
+const SH=['Panel','Remove frame','Separate glass','Recover cells','Concentrate','Selective leaching','Precipitate / electrodeposit','Recovered Ag'];
+const OV=['Silver recovery: concentrate first, then leach','Follow one end-of-life panel from dismantling to recovered silver. Teal stages are physical, amber stages are chemical. Grey bins show material that leaves the silver path. Press Start tour, or click any stage.','Five physical steps shrink the problem. Three chemical steps finish it. First concentrate, then chemically recover.'];
+const L=[],D=[];let cur=-1,timer=null,cmp=false;const DUR=7000;
+SH.forEach((n,i)=>{const l=document.createElement('div');l.className='lbl'+(i>4?' ch':'');l.innerHTML='<b>'+(i+1)+'</b><span>'+n+'</span>';l.onclick=()=>nav(i);$('#labels').appendChild(l);L.push(l);
+ const b=document.createElement('button');b.textContent=i+1;b.title=S[i][0];if(i>4)b.className='ch';b.onclick=()=>nav(i);$('#dots').appendChild(b);D.push(b)});
+const st={tx:0,ty:.6,tz:0,th:.15,ph:1.12,d:60},goal=Object.assign({},st);
+function setGoal(){if(cmp)Object.assign(goal,{tx:innerWidth>=760?-9:0,ty:0,tz:-7,th:0,ph:.82,d:Math.min(130,66/Math.max(.45,cam.aspect))});else if(cur<0)Object.assign(goal,{tx:0,ty:.5,tz:0,th:.15,ph:1.12,d:Math.min(110,50/Math.max(.45,cam.aspect))});
+ else Object.assign(goal,{tx:X(cur),ty:.9,tz:-.6,th:.4,ph:1.15,d:Math.min(16,7.5*Math.max(1,1.1/cam.aspect))})}
+function render(){const o=cur<0;document.body.classList.toggle('cmp',cmp);
+ $('#ct').textContent=o?OV[0]:S[cur][0];$('#cd').textContent=o?OV[1]:S[cur][2];
+ $('#inn').textContent=o?'End-of-life panels':S[cur][3];$('#out').textContent=o?'Recovered silver':S[cur][4];
+ $('#sp').textContent=o?OV[2]:S[cur][5];$('#mf').style.width=(o?0:S[cur][6])+'%';$('#meter').style.visibility=o?'hidden':'visible';
+ $('#step').textContent=o?'':'Step '+(cur+1)+' of '+N;
+ const tg=$('#tag');tg.textContent=o?'OVERVIEW':S[cur][1].toUpperCase();tg.className=o?'o':cur<5?'p':'c';
+ $('#next').textContent=cur<0?'Start tour ›':cur>=N-1?'Restart ›':'Next ›';$('#cmpb').classList.toggle('on',cmp);
+ document.body.classList.toggle('s0',cur===0);$('#big').textContent=o?'':String(cur+1).padStart(2,'0');
+ D.forEach((b,k)=>b.classList.toggle('on',k==cur));L.forEach((l,k)=>l.classList.toggle('on',k==cur))}
+function go(i){cur=Math.max(-1,Math.min(N-1,i));cmp=false;cam.fov=55;setGoal();render()}
+function stop(){clearTimeout(timer);timer=null;$('#auto').classList.remove('on');const p=$('#prog');p.style.transition='none';p.style.width='0'}
+function nav(i){stop();go(i)}
+function sched(){const p=$('#prog');p.style.transition='none';p.style.width='0';void p.offsetWidth;p.style.transition='width '+DUR+'ms linear';p.style.width='100%';
+ timer=setTimeout(()=>{if(cur>=N-1){stop();return}go(cur+1);sched()},DUR)}
+function auto(){if(timer)return stop();$('#auto').classList.add('on');if(cur>=N-1||cur<0)go(0);sched()}
+function compare(){stop();cmp=!cmp;if(cmp)cur=-1;setGoal();render()}
+function notes(){document.body.classList.toggle('nonotes');$('#notes').classList.toggle('on',!document.body.classList.contains('nonotes'))}
+function fs(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+$('#prev').onclick=()=>nav(cur-1);$('#next').onclick=()=>nav(cur>=N-1?0:cur+1);$('#ov').onclick=()=>nav(-1);
+$('#auto').onclick=auto;$('#cmpb').onclick=compare;$('#notes').onclick=notes;$('#fs').onclick=fs;
+$('#theme').onclick=()=>{const r=document.documentElement,dark=(r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches);r.dataset.theme=dark?'light':'dark';theme()};
+function kUpd(){const k=+$('#k').value,w=100/k,f=x=>(x%1?x.toFixed(1):x)+'%';NC.textContent='Only ~'+f(w)+' goes into the tank (illustrative)';$('#kv').textContent=k+'×';
+ $('#bo').style.width=Math.max(w,9)+'%';$('#bo').textContent=f(w);
+ [['br','v2'],['bt','v3'],['bs','v4'],['bo','v1']].forEach(([b,v])=>{if(b!=='bo'){$('#'+b).style.width=Math.max(w,9)+'%';$('#'+b).textContent=f(w)}$('#'+v).textContent=f(w)})}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.tp').forEach(p=>p.classList.toggle('on',p.id===b.dataset.t))});
+
+function mkCollapse(panel,btn,full,short){const t=()=>{const m=panel.classList.toggle('min');btn.textContent=m?'▸ '+full:'▾ '+short;btn.setAttribute('aria-expanded',!m)};btn.onclick=e=>{e.stopPropagation();t()};return t}
+{const t1=mkCollapse($('#cmp'),$('#cc'),'Expand','Collapse');$('#cmphd').onclick=t1;
+ const t2=mkCollapse($('#card'),$('#cc2'),'','');$('#cc2').textContent='▾';$('#cc2').onclick=e=>{e.stopPropagation();const m=$('#card').classList.toggle('min');$('#cc2').textContent=m?'▸':'▾'}}
+$('#k').oninput=kUpd;kUpd();
+$('#xp').oninput=e=>{xAuto=false;XV=e.target.value/100};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'&&e.key.startsWith('Arrow'))return;
+ if(e.key==='ArrowRight')nav(cur+1);else if(e.key==='ArrowLeft')nav(cur-1);else if(e.key===' '){e.preventDefault();auto()}
+ else if(e.key==='o')nav(-1);else if(e.key==='c')compare();else if(e.key==='n')notes();else if(e.key==='f')fs()});
+if(innerWidth<760)notes();
+let drag=null;
+cv.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{if(!drag)return;goal.th-=(e.clientX-drag[0])*.006;goal.ph=Math.max(.35,Math.min(1.5,goal.ph-(e.clientY-drag[1])*.006));drag=[e.clientX,e.clientY]});
+const up=()=>{drag=null;cv.style.cursor='grab'};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();goal.d=Math.max(3,Math.min(120,goal.d*(1+e.deltaY*.001)))},{passive:false});
+function theme(){const bg=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),c=new THREE.Color(bg),dark=(c.r+c.g+c.b)/3<.4;
+ scene.background=c;scene.fog=new THREE.Fog(c,70,170);floorM.color.set(dark?0x0f3a50:0xcfdce4);grid.material.opacity=dark?.25:.18}
+function size(){const w=innerWidth,h=innerHeight;ren.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();setGoal()}
+addEventListener('resize',size);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',theme);
+document.documentElement.dataset.theme='dark';
+theme();size();render();Object.assign(st,goal);
+const clock=new THREE.Clock(),v=new THREE.Vector3();
+function tick(){const t=clock.getElapsedTime();A.forEach(f=>f&&f(t));OLD.visible=cmp;if(cmp)AO.forEach(f=>f(t));
+ OL.forEach((l,i)=>lp(l,OX(i),3.2,-14,cmp));CL.forEach(c=>lp(c[0],c[1],c[2],c[3],cmp));
+ R.forEach((r,i)=>{const on=cur<0||cur===i;r.material.opacity=on?1:.3;r.scale.setScalar(cur===i?1+.05*Math.sin(t*4):1)});
+ sp2.forEach(s=>{const show=cur<0||cur===s.i;s.ps.forEach(o=>{o.m.visible=show;const u=(t*.22+o.p)%1;o.m.position.set(X(s.i)+Math.sin(o.p*20)*.35,.95-.7*u*u,-.9-2.5*u);o.m.scale.setScalar(Math.min(1,(1-u)*4))})});
+ GLW.forEach(o=>o.m.material.opacity=.35+.25*Math.sin(t*2+o.ph));
+ const pa=dg.attributes.position.array;for(let i=0;i<DN;i++)pa[i*3+1]=(pa[i*3+1]+.004+(i%5)*.0008)%12;dg.attributes.position.needsUpdate=true;
+ PK.forEach((o,i)=>{const u=(t*.25+o.p)%1;o.m.position.copy(o.c.getPoint(u));o.m.scale.setScalar(.5+.7*Math.sin(u*Math.PI))});
+ const wu=(t*.6)%1;wave.visible=cur>=0;wave.position.x=X(Math.max(cur,0));wave.scale.setScalar(1+wu*.9);wave.material.opacity=(1-wu)*.8;wave.material.color.set(cur<5?0x5cc8d4:0xf5a623);
+ if(Math.abs(cam.fov-45)>.01){cam.fov+=(45-cam.fov)*.08;cam.updateProjectionMatrix()}
+ if(cur===0&&xAuto)$('#xp').value=EXV*100;
+ for(const k in st)st[k]+=(goal[k]-st[k])*.07;
+ const th=st.th+(drag?0:Math.sin(t*.25)*.06);
+ cam.position.set(st.tx+st.d*Math.sin(st.ph)*Math.sin(th),st.ty+st.d*Math.cos(st.ph),st.tz+st.d*Math.sin(st.ph)*Math.cos(th));cam.lookAt(st.tx,st.ty,st.tz);
+ fd.forEach((m,k)=>{const x=x0+((k/36+t*.035)%1)*(x7-x0);m.position.x=x;m.material=x<B?dT:dA});
+ cam.updateMatrixWorld();
+ L.forEach((l,i)=>{v.set(X(i),3.2,0).project(cam);l.style.display=v.z>1?'none':'block';l.style.left=(v.x*.5+.5)*innerWidth+'px';l.style.top=(-v.y*.5+.5)*innerHeight+'px'});
+ LAYL.forEach((l,i)=>{const y=i<5?LAY[i].y:.7;v.set(X(0)+1.9,y,.9).project(cam);const show=cur===0&&v.z<1&&EXV>.25;l.style.display=show?'block':'none';l.style.left=(v.x*.5+.5)*innerWidth+'px';l.style.top=(-v.y*.5+.5)*innerHeight+'px'});
+ for(const k in binL){const l=binL[k];v.set(X(+k),.9,-3.4).project(cam);const show=(cur<0||cur===+k)&&v.z<1;l.style.display=show?'block':'none';l.style.left=(v.x*.5+.5)*innerWidth+'px';l.style.top=(-v.y*.5+.5)*innerHeight+'px'}
+ ren.render(scene,cam);requestAnimationFrame(tick)}
+tick();
+})();
+</script>
+</body>
+</html>
